@@ -201,7 +201,7 @@ class ContactDetailScreenState extends State<ContactDetailScreen> {
                       radius: 50,
                       backgroundColor: Theme.of(context).primaryColor,
                       child: Text(
-                        '${widget.contact.firstName[0]}${widget.contact.lastName[0]}',
+                        '${widget.contact.firstName}${widget.contact.lastName}',
                         style: const TextStyle(
                           fontSize: 30,
                           color: Colors.white,
@@ -342,8 +342,8 @@ class ContactDetailScreenState extends State<ContactDetailScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+            decoration: const BoxDecoration(
+              color: Colors.green,
               shape: BoxShape.circle,
             ),
             child: Icon(
