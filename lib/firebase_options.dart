@@ -17,29 +17,17 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -58,6 +46,46 @@ class DefaultFirebaseOptions {
     messagingSenderId: '380969733195',
     projectId: 'globetransmessage',
     storageBucket: 'globetransmessage.firebasestorage.app',
+    iosClientId: '380969733195-miievqar994dopi44njse320fi7ho87l.apps.googleusercontent.com',
     iosBundleId: 'com.example.globeTransApp',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyB6AqvGJj7gdDtIHwa3R26tuGJYZqG78GU',
+    appId: '1:380969733195:web:3e6a1dc74e9295dba1d1ce',
+    messagingSenderId: '380969733195',
+    projectId: 'globetransmessage',
+    authDomain: 'globetransmessage.firebaseapp.com',
+    storageBucket: 'globetransmessage.firebasestorage.app',
+    measurementId: 'G-9GQBST38DE',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyCRG1swg67AnfZSJdOFYE4aqS3OmsjvVwQ',
+    appId: '1:380969733195:ios:9bc5ace12763ff03a1d1ce',
+    messagingSenderId: '380969733195',
+    projectId: 'globetransmessage',
+    storageBucket: 'globetransmessage.firebasestorage.app',
+    iosClientId: '380969733195-miievqar994dopi44njse320fi7ho87l.apps.googleusercontent.com',
+    iosBundleId: 'com.example.globeTransApp',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyBm0pposjKiLeYqIH9axQxurp_0kri2ICA',
+    appId: '1:380969733195:android:c1a08fe0c434dd6ba1d1ce',
+    messagingSenderId: '380969733195',
+    projectId: 'globetransmessage',
+    storageBucket: 'globetransmessage.firebasestorage.app',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyB6AqvGJj7gdDtIHwa3R26tuGJYZqG78GU',
+    appId: '1:380969733195:web:de01ae057444223da1d1ce',
+    messagingSenderId: '380969733195',
+    projectId: 'globetransmessage',
+    authDomain: 'globetransmessage.firebaseapp.com',
+    storageBucket: 'globetransmessage.firebasestorage.app',
+    measurementId: 'G-MNREB4Q5N5',
+  );
+
 }
