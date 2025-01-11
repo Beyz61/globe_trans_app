@@ -107,6 +107,15 @@ class _ContactViewState extends State<ContactView> {
     );
   }
 
+  void deleteContact(Contact contact) async {
+    await context.read<DatabaseRepository>().deleteContact(contact);
+    await context.read<DatabaseRepository>().removeFromChats(contact);
+    setState(() {
+      _contacts.remove("${contact.firstName} ${contact.lastName}");
+      _filteredContacts.remove("${contact.firstName} ${contact.lastName}");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -200,6 +209,8 @@ class _ContactViewState extends State<ContactView> {
                           itemCount: _filteredContacts.length,
                           itemBuilder: (context, index) {
                             String contactName = _filteredContacts[index];
+                            Contact contact =
+                                (snapshot.data as List<Contact>)[index];
                             return Padding(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 3.0, horizontal: 35.0),
@@ -240,9 +251,13 @@ class _ContactViewState extends State<ContactView> {
                                       fontSize: 14,
                                     ),
                                   ),
-                                  onTap: () => _navigateToContactDetail(snapshot
-                                          .data![
-                                      index]), // Ensure this line is correct
+                                  // trailing: IconButton(
+                                  //   icon: const Icon(Icons.delete,
+                                  //       color: Colors.red),
+                                  //   onPressed: () => _deleteContact(contact),
+                                  // ),
+                                  onTap: () =>
+                                      _navigateToContactDetail(contact),
                                 ),
                               ),
                             );
