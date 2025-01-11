@@ -49,14 +49,18 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
   // Kontakt löschen
   @override
   Future<void> deleteContact(Contact contact) async {
-    // TODO: Delete funktion muss noch erledigt werden
     final firestore = FirebaseFirestore.instance;
     String userId = await getUserId();
-    firestore
+    final snapshot = await firestore
         .collection("users")
         .doc(userId)
         .collection("contacts")
-        .where("phoneNumber", isEqualTo: contact.phoneNumber);
+        .where("phoneNumber", isEqualTo: contact.phoneNumber)
+        .get();
+
+    for (var doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
   }
 
   @override
@@ -200,5 +204,41 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
       Message message, String newContent, String newTimeStamp) async {
     // Muss noch implementiert werden
     throw UnimplementedError();
+  }
+
+  @override
+  Future<void> removeFromChats(Contact contact) async {
+    final firestore = FirebaseFirestore.instance;
+    String userId = await getUserId();
+
+    await firestore
+        .collection("users")
+        .doc(userId)
+        .collection("chat_contacts")
+        .doc(contact.phoneNumber)
+        .delete();
+  }
+
+  @override
+  Future<void> updateContact(Contact contact, String firstName, String lastName,
+      String email, String phoneNumber, String image) async {
+    final firestore = FirebaseFirestore.instance;
+    String userId = await getUserId();
+    final snapshot = await firestore
+        .collection("users")
+        .doc(userId)
+        .collection("contacts")
+        .where("phoneNumber", isEqualTo: contact.phoneNumber)
+        .get();
+
+    for (var doc in snapshot.docs) {
+      await doc.reference.update({
+        "firstName": firstName,
+        "lastName": lastName,
+        "email": email,
+        "phoneNumber": phoneNumber,
+        "image": image,
+      });
+    }
   }
 }
