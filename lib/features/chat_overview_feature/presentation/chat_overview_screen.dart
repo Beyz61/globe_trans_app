@@ -15,6 +15,9 @@ class ChatView extends StatefulWidget {
 }
 
 class _ChatViewState extends State<ChatView> {
+  void searchContact(String value) {
+    // Implement your search logic here
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +28,7 @@ class _ChatViewState extends State<ChatView> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Divider(color: Colors.green),
-              const SizedBox(height: 10),
+              const SizedBox(height: 5),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -38,6 +41,46 @@ class _ChatViewState extends State<ChatView> {
                 ],
               ),
               const Divider(color: Colors.green),
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width *
+                      0.8, // Adjust the width as needed
+                  child: TextField(
+                    onChanged: (value) {
+                      searchContact(value); // Call the search function
+                    },
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: 20,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                          borderSide: BorderSide.none),
+                      hintText: "Kontakte Suchen",
+                      hintStyle: const TextStyle(
+                          fontSize: 16,
+                          fontFamily: "SFProDisplay",
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey),
+                      prefixIcon: const Icon(Icons.search,
+                          size: 28, color: Colors.grey),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        onPressed: () {
+                          // Clear the search field
+                          searchContact('');
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
               Expanded(
                 child: FutureBuilder<List<Contact>>(
                   future: context
