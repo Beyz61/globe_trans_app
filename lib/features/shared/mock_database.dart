@@ -75,6 +75,11 @@ class MockDatabase implements DatabaseRepository {
     }
   }
 
+  @override
+  Future<void> removeFromChats(Contact contact) async {
+    _chatContacts.remove(contact);
+  }
+
 // Chat Kontakte abrufen
   @override
   Future<List<Contact>> getChatContacts() async {
@@ -119,8 +124,23 @@ class MockDatabase implements DatabaseRepository {
 
   // Kontakt anzeigen
   @override
-  Future<void> getContact(Contact contact) async {
+  Future<Contact?> getContact(Contact contact) async {
     await Future.delayed(const Duration(seconds: 1));
-    contacts.add(contact);
+    return contacts.contains(contact) ? contact : null;
+  }
+
+  @override
+  Future<void> updateContact(Contact contact, String firstName, String lastName,
+      String email, String phoneNumber, String image) async {
+    final index = contacts.indexOf(contact);
+    if (index != -1) {
+      contacts[index] = Contact(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phoneNumber: phoneNumber,
+        image: image,
+      );
+    }
   }
 }
