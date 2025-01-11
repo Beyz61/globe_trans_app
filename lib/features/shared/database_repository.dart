@@ -31,6 +31,7 @@ abstract class DatabaseRepository {
 
   // hinzufügen zu chats
   Future<void> addToChats(Contact contact);
+  Future<void> removeFromChats(Contact contact);
   Future<List<Contact>> getChatContacts();
 
   // Kontakte
@@ -40,6 +41,10 @@ abstract class DatabaseRepository {
   Future<void> addContact(String firstName, String lastName, String email,
       String phoneNumber, String image);
   notifyListeners();
+
+  // Kontakte aktualisieren
+  Future<void> updateContact(Contact contact, String firstName, String lastName,
+      String email, String phoneNumber, String image);
 
   // Kontakte löschen
   Future<void> deleteContact(Contact contact);
