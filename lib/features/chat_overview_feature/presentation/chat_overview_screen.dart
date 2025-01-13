@@ -16,7 +16,7 @@ class ChatView extends StatefulWidget {
 
 class _ChatViewState extends State<ChatView> {
   void searchContact(String value) {
-    // Implement your search logic here
+    // muss noch implementiert werden
   }
   @override
   Widget build(BuildContext context) {
@@ -45,10 +45,10 @@ class _ChatViewState extends State<ChatView> {
                 padding: const EdgeInsets.all(15.0),
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width *
-                      0.8, // Adjust the width as needed
+                      0.8, // 80% der Bildschirmbreite
                   child: TextField(
                     onChanged: (value) {
-                      searchContact(value); // Call the search function
+                      searchContact(value);
                     },
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
@@ -72,7 +72,7 @@ class _ChatViewState extends State<ChatView> {
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.clear, color: Colors.grey),
                         onPressed: () {
-                          // Clear the search field
+                          // Suchfeld leeren
                           searchContact('');
                         },
                       ),
@@ -83,9 +83,7 @@ class _ChatViewState extends State<ChatView> {
               const SizedBox(height: 10),
               Expanded(
                 child: FutureBuilder<List<Contact>>(
-                  future: context
-                      .read<DatabaseRepository>()
-                      .getChatContacts(), // Changed this line
+                  future: context.read<DatabaseRepository>().getChatContacts(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
