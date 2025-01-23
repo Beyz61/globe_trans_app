@@ -100,11 +100,12 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
         .get();
     return snapshot.docs
         .map((doc) => Contact(
-            firstName: doc["firstName"],
-            lastName: doc["lastName"],
-            email: doc["email"],
-            phoneNumber: doc["phoneNumber"],
-            image: doc["image"]))
+              firstName: doc["firstName"],
+              lastName: doc["lastName"],
+              email: doc["email"],
+              phoneNumber: doc["phoneNumber"],
+              image: doc["image"],
+            ))
         .toList();
   }
 
