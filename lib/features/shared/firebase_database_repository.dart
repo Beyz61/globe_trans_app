@@ -10,6 +10,25 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
     // noch nicht implementiert
   }
 
+  // Benutzer-Telefonnummer abrufen
+  Future<String> getUserPhoneNumber() async {
+    try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      User? user = auth.currentUser;
+      if (user != null) {
+        final firestore = FirebaseFirestore.instance;
+        final userDoc = await firestore.collection("users").doc(user.uid).get();
+        return userDoc["phoneNumber"];
+      } else {
+        print("Kein authentifizierter Benutzer gefunden.");
+        return '';
+      }
+    } catch (e) {
+      print("Fehler beim Abrufen der Telefonnummer: $e");
+      return '';
+    }
+  }
+
   // Benutzer-ID abrufen
   Future<String> getUserId() async {
     try {
@@ -29,13 +48,15 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
 
   // Chat-Funktionen
   @override
-  Future<void> createChat(Message message, String receiver) async {
+  Future<void> createChat(Message message, String receiverPhoneNumber) async {
     final firestore = FirebaseFirestore.instance;
     String userId = await getUserId();
+    String userPhoneNumber =
+        await getUserPhoneNumber(); // Methode zum Abrufen der Telefonnummer des Benutzers
     final chatRef = firestore.collection("chats").doc();
 
     await chatRef.set({
-      "participants": [userId, receiver],
+      "participants": [userPhoneNumber, receiverPhoneNumber],
       "created_at": DateTime.now().toIso8601String(),
     });
 
