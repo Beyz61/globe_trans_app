@@ -34,18 +34,18 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final List<Message> messages = [
-    // Message(
-    //     "Hello, how are you?\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nWie geht e dir?",
-    //     false,
-    //     DateTime.now().subtract(const Duration(minutes: 5))),
-    // Message("Mir geht's gut, danke!", true,
-    //     DateTime.now().subtract(const Duration(minutes: 4))),
-    // Message(
-    //     "Do you have time today?\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nHast du heute Zeit?",
-    //     false,
-    //     DateTime.now().subtract(const Duration(minutes: 3))),
-    // Message("Ja, gerne! Lass uns treffen.", true,
-    //     DateTime.now().subtract(const Duration(minutes: 2))),
+    Message(
+        "Hello, how are you?\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nWie geht e dir?",
+        false,
+        DateTime.now().subtract(const Duration(minutes: 5))),
+    Message("Mir geht's gut, danke!", true,
+        DateTime.now().subtract(const Duration(minutes: 4))),
+    Message(
+        "Do you have time today?\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nHast du heute Zeit?",
+        false,
+        DateTime.now().subtract(const Duration(minutes: 3))),
+    Message("Ja, gerne! Lass uns treffen.", true,
+        DateTime.now().subtract(const Duration(minutes: 2))),
   ];
 
   final TextEditingController _controller = TextEditingController();
@@ -230,7 +230,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (_controller.text.isNotEmpty) {
                   setState(() {
                     messages.add(Message(_controller.text, true, DateTime.now(),
-                        isRead: true)); // Set isRead to true for testing
+                        isRead: true));
+                    context.read<DatabaseRepository>().sendMessage(Message(
+                        _controller.text, true, DateTime.now(),
+                        isRead: true));
                     _controller.clear();
                   });
                 }
