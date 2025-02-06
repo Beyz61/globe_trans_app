@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:globe_trans_app/config/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';

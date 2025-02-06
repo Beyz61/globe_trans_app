@@ -1,5 +1,8 @@
 import 'package:globe_trans_app/features/adcontact_feature/presentation/class.contact.dart';
-import 'package:globe_trans_app/features/chat_feature/presentation/chat_screen.dart';
+import 'package:globe_trans_app/features/chat_feature/presentation/chat_screen.dart'
+    as chat;
+import 'package:globe_trans_app/features/shared/models/message.dart'
+    as shared; // Update import
 
 abstract class DatabaseRepository {
   // Message
@@ -7,27 +10,42 @@ abstract class DatabaseRepository {
   // Future<void> getMessage(Message message);
 
   // Sende Nachrichten
-  Future<void> sendMessage(Message message);
+  Future<void> sendMessage(
+      shared.Message message, String contactPhoneNumber) async {
+    // Implementation to save the message to the database
+    // Example:
+    // await database.insert('messages', {
+    //   'text': message.text,
+    //   'isSent': message.isSent ? 1 : 0,
+    //   'timestamp': message.timestamp.toIso8601String(),
+    //   'isRead': message.isRead ? 1 : 0,
+    //   'contactName': message.contactName,
+    //   'senderId': message.senderId,
+    //   'contactPhoneNumber': contactPhoneNumber,
+    // });
+  }
+
+  Future<void> saveMessage(shared.Message message) async {}
 
   // Löschen einer Nachricht
-  Future<void> deleteMessage(Message message);
+  Future<void> deleteMessage(shared.Message message);
 
   // Update einer Nachricht
   Future<void> updateMessage(
-      Message message, String newContent, String newTimeStamp);
+      shared.Message message, String newContent, String newTimeStamp);
 
   // Übersicht aller Nachrichten
-  Future<List<Message>> getAllMessages();
+  Future<List<shared.Message>> getAllMessages();
 
   // Hier kommt das ganze für Chat hin
 
-  Future<void> newGroupChat(List<Message> messages);
+  Future<void> newGroupChat(List<shared.Message> messages);
 
   // Neue chat erstellen
-  Future<void> createChat(Message message, String receiver);
+  Future<void> createChat(shared.Message message, String receiver);
 
   // Übersicht aller chats
-  Future<List<Chat>> getAllChats();
+  Future<List<chat.Chat>> getAllChats();
 
   // hinzufügen zu chats
   Future<void> addToChats(Contact contact);
@@ -55,4 +73,15 @@ abstract class DatabaseRepository {
   // Kontakt Liste anzeigen
 
   Future<void> getContact(Contact contact);
+
+  Future<List<shared.Message>> getMessagesForContact(String contactName) async {
+    return [
+      shared.Message("Hello, how are you?", false,
+          DateTime.now().subtract(const Duration(minutes: 5)),
+          contactName: contactName, senderId: 'sender1'),
+      shared.Message("I'm good, thanks!", true,
+          DateTime.now().subtract(const Duration(minutes: 4)),
+          contactName: contactName, senderId: 'sender2'),
+    ];
+  }
 }

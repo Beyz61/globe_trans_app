@@ -1,8 +1,21 @@
 import 'package:globe_trans_app/features/adcontact_feature/presentation/class.contact.dart';
 import 'package:globe_trans_app/features/chat_feature/presentation/chat_screen.dart';
 import 'package:globe_trans_app/features/shared/database_repository.dart';
+import 'package:globe_trans_app/features/shared/models/message.dart'; // Update import
 
 class MockDatabase implements DatabaseRepository {
+  @override
+  Future<void> saveMessage(Message message) async {
+    await Future.delayed(const Duration(seconds: 1));
+    _messages.add(message);
+  }
+
+  @override
+  Future<List<Message>> getMessagesForContact(String contactId) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return _messages.where((message) => message.senderId == contactId).toList();
+  }
+
   @override
   void notifyListeners() {
     // noch nicht implementiert
@@ -16,7 +29,7 @@ class MockDatabase implements DatabaseRepository {
 
   // Sende Nachrichten
   @override
-  Future<void> sendMessage(Message message) async {
+  Future<void> sendMessage(Message message, String receiver) async {
     await Future.delayed(
         const Duration(seconds: 1), () => _messages.add(message));
   }
@@ -34,8 +47,9 @@ class MockDatabase implements DatabaseRepository {
       Message message, String newContent, String newTimeStamp) async {
     final index = _messages.indexOf(message);
     if (index != -1) {
-      _messages[index] =
-          Message(newContent, message.isSent, DateTime.parse(newTimeStamp));
+      _messages[index] = Message(
+          newContent, message.isSent, DateTime.parse(newTimeStamp),
+          contactName: '', senderId: '');
     }
   }
 

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:globe_trans_app/features/register_feature/widgets/verify_button.dart';
 

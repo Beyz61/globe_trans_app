@@ -3,8 +3,32 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:globe_trans_app/features/adcontact_feature/presentation/class.contact.dart';
 import 'package:globe_trans_app/features/chat_feature/presentation/chat_screen.dart';
 import 'package:globe_trans_app/features/shared/database_repository.dart';
+import 'package:globe_trans_app/features/shared/models/message.dart';
 
 class FirebaseDatabaseRepository implements DatabaseRepository {
+  @override
+  Future<List<Message>> getMessagesForContact(String contactPhoneNumber) async {
+    final firestore = FirebaseFirestore.instance;
+    String userId = await getUserId();
+    final snapshot = await firestore
+        .collection("users")
+        .doc(userId)
+        .collection("messages")
+        .where("contactId", isEqualTo: contactPhoneNumber)
+        .get();
+
+    return snapshot.docs.map((doc) {
+      return Message(
+        doc["text"],
+        doc["isSent"],
+        DateTime.parse(doc["timestamp"]),
+        senderId: doc["senderId"],
+        contactName: doc["contactName"],
+        isRead: doc["isRead"],
+      );
+    }).toList();
+  }
+
   @override
   void notifyListeners() {
     // noch nicht implementiert
@@ -103,6 +127,8 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
           messageDoc["text"],
           messageDoc["isSent"],
           DateTime.parse(messageDoc["timestamp"]),
+          senderId: messageDoc["senderId"],
+          contactName: messageDoc["contactName"],
           isRead: messageDoc["isRead"],
         );
       }).toList();
@@ -184,11 +210,12 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
   final List<Message> _messages = [];
 
   @override
-  Future<void> sendMessage(Message message) async {
+  Future<void> sendMessage(Message message, String chatId) async {
     final firestore = FirebaseFirestore.instance;
     String userId = await getUserId();
-    final chatRef =
-        firestore.collection("chats").doc(); // Use the correct chat reference
+    final chatRef = firestore
+        .collection("chats")
+        .doc(chatId); // Use the correct chat reference
 
     await chatRef.collection("messages").add({
       "text": message.text,
@@ -343,5 +370,11 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
   @override
   Future<Contact> getContact(Contact contact) async {
     return contact;
+  }
+
+  @override
+  Future<void> saveMessage(Message message) async {
+    // Muss noch implementiert werden
+    return;
   }
 }

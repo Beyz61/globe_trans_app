@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:globe_trans_app/config/colors.dart';
 import 'package:globe_trans_app/features/adcontact_feature/presentation/class.contact.dart';

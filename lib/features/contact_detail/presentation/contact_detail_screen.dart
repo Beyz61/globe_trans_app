@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:globe_trans_app/features/adcontact_feature/presentation/class.contact.dart';
 import 'package:globe_trans_app/features/adcontact_feature/widgets/input_email_field.dart';

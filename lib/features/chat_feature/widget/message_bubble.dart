@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:globe_trans_app/features/chat_feature/presentation/chat_screen.dart';
+import 'package:globe_trans_app/features/shared/models/message.dart';
 import 'package:intl/intl.dart';
 
 class MessageBubble extends StatelessWidget {

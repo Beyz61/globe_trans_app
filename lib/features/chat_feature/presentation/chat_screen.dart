@@ -3,16 +3,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:globe_trans_app/features/shared/database_repository.dart';
+import 'package:globe_trans_app/features/shared/models/message.dart';
 import 'package:provider/provider.dart';
-
-class Message {
-  final String text;
-  final bool isSent;
-  final DateTime timestamp;
-  final bool isRead; // Add this property
-
-  Message(this.text, this.isSent, this.timestamp, {this.isRead = false});
-}
 
 class Chat {
   final List<Message> messages;
@@ -33,22 +25,25 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final List<Message> messages = [
-    Message(
-        "Hello, how are you?\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nWie geht e dir?",
-        false,
-        DateTime.now().subtract(const Duration(minutes: 5))),
-    Message("Mir geht's gut, danke!", true,
-        DateTime.now().subtract(const Duration(minutes: 4))),
-    Message(
-        "Do you have time today?\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nHast du heute Zeit?",
-        false,
-        DateTime.now().subtract(const Duration(minutes: 3))),
-    Message("Ja, gerne! Lass uns treffen.", true,
-        DateTime.now().subtract(const Duration(minutes: 2))),
-  ];
+  final List<Message> messages = [];
 
   final TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMessages();
+  }
+
+  Future<void> _loadMessages() async {
+    final loadedMessages =
+        await Provider.of<DatabaseRepository>(context, listen: false)
+            .getMessagesForContact(widget.contactName);
+    setState(() {
+      messages.clear();
+      messages.addAll(loadedMessages);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,120 +79,120 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(height: 20),
           Expanded(
             child: FutureBuilder(
-              future: context.read<DatabaseRepository>().getAllMessages(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Center(
-                    child: Text("Nachrichten konnten nicht geladen werden."),
-                  );
-                } else if (!snapshot.hasData) {
-                  return Center(
-                      child: Platform.isAndroid
-                          ? const CircularProgressIndicator()
-                          : const CupertinoActivityIndicator());
-                }
-                return ListView.builder(
-                  itemCount: messages.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      final now = DateTime.now();
-                      final chatStartDate =
-                          messages.isNotEmpty ? messages.first.timestamp : now;
-                      final isToday = now.day == chatStartDate.day &&
-                          now.month == chatStartDate.month &&
-                          now.year == chatStartDate.year;
-                      final startDateText = isToday
-                          ? "Heute"
-                          : "${_getWeekday(chatStartDate.weekday)} ${chatStartDate.day}.${_getMonth(chatStartDate.month)}";
-                      return Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Center(
-                          child: Text(
-                            "Chat gestartet am $startDateText",
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                              fontStyle: FontStyle.italic,
+                future: context.read<DatabaseRepository>().getAllMessages(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text("Nachrichten konnten nicht geladen werden."),
+                    );
+                  } else if (!snapshot.hasData) {
+                    return Center(
+                        child: Platform.isAndroid
+                            ? const CircularProgressIndicator()
+                            : const CupertinoActivityIndicator());
+                  }
+                  return ListView.builder(
+                    itemCount: messages.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        final now = DateTime.now();
+                        final chatStartDate = messages.isNotEmpty
+                            ? messages.first.timestamp
+                            : now;
+                        final isToday = now.day == chatStartDate.day &&
+                            now.month == chatStartDate.month &&
+                            now.year == chatStartDate.year;
+                        final startDateText = isToday
+                            ? "Heute"
+                            : "${_getWeekday(chatStartDate.weekday)} ${chatStartDate.day}.${_getMonth(chatStartDate.month)}";
+                        return Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Center(
+                            child: Text(
+                              "Chat gestartet am $startDateText",
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      final message = messages[index - 1];
+                      return Align(
+                        alignment: message.isSent
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: IntrinsicWidth(
+                          child: Container(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width *
+                                  0.6, // Adjusted width
+                            ),
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 10),
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              color: message.isSent
+                                  ? Colors.green
+                                  : Colors.grey[300],
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(20),
+                                topRight: const Radius.circular(20),
+                                bottomLeft: message.isSent
+                                    ? const Radius.circular(20)
+                                    : Radius.zero,
+                                bottomRight: message.isSent
+                                    ? Radius.zero
+                                    : const Radius.circular(20),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  message.text,
+                                  style: TextStyle(
+                                    color: message.isSent
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "${message.timestamp.hour.toString().padLeft(2, '0')}:${message.timestamp.minute.toString().padLeft(2, '0')}",
+                                      style: TextStyle(
+                                        color: message.isSent
+                                            ? Colors.white70
+                                            : Colors.black54,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    if (message.isSent)
+                                      Icon(
+                                        message.isRead
+                                            ? Icons.done_all
+                                            : Icons.check,
+                                        color: message.isRead
+                                            ? Colors.blue
+                                            : Colors.grey,
+                                        size: 16,
+                                      ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       );
-                    }
-                    final message = messages[index - 1];
-                    return Align(
-                      alignment: message.isSent
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: IntrinsicWidth(
-                        child: Container(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width *
-                                0.6, // Adjusted width
-                          ),
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 10),
-                          padding: const EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: message.isSent
-                                ? Colors.green
-                                : Colors.grey[300],
-                            borderRadius: BorderRadius.only(
-                              topLeft: const Radius.circular(20),
-                              topRight: const Radius.circular(20),
-                              bottomLeft: message.isSent
-                                  ? const Radius.circular(20)
-                                  : Radius.zero,
-                              bottomRight: message.isSent
-                                  ? Radius.zero
-                                  : const Radius.circular(20),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                message.text,
-                                style: TextStyle(
-                                  color: message.isSent
-                                      ? Colors.white
-                                      : Colors.black,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    "${message.timestamp.hour.toString().padLeft(2, '0')}:${message.timestamp.minute.toString().padLeft(2, '0')}",
-                                    style: TextStyle(
-                                      color: message.isSent
-                                          ? Colors.white70
-                                          : Colors.black54,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  if (message.isSent)
-                                    Icon(
-                                      message.isRead
-                                          ? Icons.done_all
-                                          : Icons.check,
-                                      color: message.isRead
-                                          ? Colors.blue
-                                          : Colors.grey,
-                                      size: 16,
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+                    },
+                  );
+                }),
           ),
           _buildMessageInput(),
         ],
@@ -228,14 +223,19 @@ class _ChatScreenState extends State<ChatScreen> {
               icon: const Icon(Icons.send, color: Colors.green),
               onPressed: () async {
                 if (_controller.text.isNotEmpty) {
+                  final newMessage = Message(
+                      _controller.text, true, DateTime.now(),
+                      isRead: true,
+                      contactName: widget.contactName,
+                      senderId: '');
                   setState(() {
-                    messages.add(Message(_controller.text, true, DateTime.now(),
-                        isRead: true));
-                    context.read<DatabaseRepository>().sendMessage(Message(
-                        _controller.text, true, DateTime.now(),
-                        isRead: true));
-                    _controller.clear();
+                    messages.add(newMessage); // Add message to local list
                   });
+                  _controller.clear();
+                  await context
+                      .read<DatabaseRepository>()
+                      .sendMessage(newMessage, widget.contactName);
+                  // No need to call _loadMessages here
                 }
               }),
         ],
