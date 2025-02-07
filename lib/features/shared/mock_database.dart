@@ -157,4 +157,9 @@ class MockDatabase implements DatabaseRepository {
       );
     }
   }
+
+  @override
+  Future<void> saveUserPhoneNumber(String phoneNumber) {
+    throw UnimplementedError();
+  }
 }
