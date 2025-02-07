@@ -7,6 +7,9 @@ import 'package:globe_trans_app/features/shared/models/message.dart'
 abstract class DatabaseRepository {
   // Message
 
+  // Wenn kein phone verification !!!
+  Future<void> saveUserPhoneNumber(String phoneNumber);
+
   // Future<void> getMessage(Message message);
 
   // Sende Nachrichten
@@ -25,7 +28,7 @@ abstract class DatabaseRepository {
     // });
   }
 
-  Future<void> saveMessage(shared.Message message) async {}
+  Future<void> saveMessage(shared.Message message);
 
   // Löschen einer Nachricht
   Future<void> deleteMessage(shared.Message message);
