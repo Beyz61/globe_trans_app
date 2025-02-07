@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:globe_trans_app/features/adcontact_feature/presentation/class.contact.dart';
@@ -7,31 +9,75 @@ import 'package:globe_trans_app/features/shared/models/message.dart';
 
 class FirebaseDatabaseRepository implements DatabaseRepository {
   @override
+  FirebaseFirestore get database => FirebaseFirestore.instance;
+  @override
   Future<List<Message>> getMessagesForContact(String contactPhoneNumber) async {
     final firestore = FirebaseFirestore.instance;
-    String userId = await getUserId();
-    final snapshot = await firestore
-        .collection("users")
-        .doc(userId)
-        .collection("messages")
-        .where("contactId", isEqualTo: contactPhoneNumber)
+    // String userId = await getUserId();
+    String userPhonenember = await getUserPhoneNumber();
+
+    final chatQuery = await firestore
+        .collection("chats")
+        .where("participants", arrayContains: userPhonenember)
+        .where("participants",
+            arrayContains:
+                contactPhoneNumber) // Falls du nur Chats zwischen diesen beiden willst
         .get();
 
-    return snapshot.docs.map((doc) {
-      return Message(
-        doc["text"],
-        doc["isSent"],
-        DateTime.parse(doc["timestamp"]),
-        senderId: doc["senderId"],
-        contactName: doc["contactName"],
-        isRead: doc["isRead"],
-      );
-    }).toList();
+    if (chatQuery.docs.isNotEmpty) {
+      // Nimm das erste gefundene Chat-Dokument
+      String chatId = chatQuery.docs.first.id;
+
+      // Greife auf die Unterkollektion 'messages' zu
+      final messagesSnapshot = await firestore
+          .collection("chats")
+          .doc(chatId)
+          .collection("messages")
+          .get();
+      print("Nachrichten gefunden: ${messagesSnapshot.docs.length}");
+
+      return messagesSnapshot.docs.map((doc) {
+        return Message(
+          doc["text"],
+          doc["isSent"],
+          DateTime.parse(doc["timestamp"]),
+          senderId: doc["senderId"],
+          contactName: doc["contactName"],
+          isRead: doc["isRead"],
+        );
+      }).toList();
+    } else {
+      print("Kein Chat gefunden.");
+      return [];
+    }
   }
 
   @override
   void notifyListeners() {
     // noch nicht implementiert
+  }
+
+  @override
+  Future<void> saveUserPhoneNumber(String phoneNumber) async {
+    try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      User? user = auth.currentUser;
+      if (user != null) {
+        final firestore = FirebaseFirestore.instance;
+        await firestore.collection("users").doc(user.uid).set(
+          {
+            "phoneNumber": phoneNumber,
+          },
+          SetOptions(
+              merge: true), // Verhindert das Überschreiben anderer Felder
+        );
+        print("Telefonnummer erfolgreich gespeichert.");
+      } else {
+        print("Kein authentifizierter Benutzer gefunden.");
+      }
+    } catch (e) {
+      print("Fehler beim Speichern der Telefonnummer: $e");
+    }
   }
 
   // Benutzer-Telefonnummer abrufen
@@ -264,8 +310,24 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
 
   @override
   Future<List<Message>> getAllMessages() async {
-    await Future.delayed(const Duration(seconds: 1));
-    return List.unmodifiable(_messages);
+    await Future.delayed(const Duration(seconds: 3));
+    final firestore = FirebaseFirestore.instance;
+    String userId = await getUserId();
+    final snapshot = await firestore
+        .collection("users")
+        .doc(userId)
+        .collection("messages")
+        .get();
+    return snapshot.docs
+        .map((doc) => Message(
+              doc["text"],
+              doc["isSent"],
+              DateTime.parse(doc["timestamp"]),
+              senderId: doc["senderId"],
+              contactName: doc["contactName"],
+              isRead: doc["isRead"],
+            ))
+        .toList();
   }
 
   // Kontakt-Funktionen
@@ -374,7 +436,13 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
 
   @override
   Future<void> saveMessage(Message message) async {
-    // Muss noch implementiert werden
-    return;
+    final firestore = FirebaseFirestore.instance;
+    String userId = await getUserId();
+    await firestore.collection("users").doc(userId).collection("messages").add({
+      "text": message.text,
+      "isSent": message.isSent,
+      "timestamp": message.timestamp.toIso8601String(),
+      "isRead": message.isRead,
+    });
   }
 }
