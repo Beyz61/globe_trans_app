@@ -69,9 +69,9 @@ class MockDatabase implements DatabaseRepository {
 
   // Neue Chat erstellen
   @override
-  Future<void> createChat(Message message, String receiver) async {
-    await Future.delayed(const Duration(seconds: 1));
-    _chats.add(Chat([message]));
+  Future<void> createChat(String receiver) async {
+    // await Future.delayed(const Duration(seconds: 1));
+    // _chats.add(Chat([message]));
   }
 
   // Übersicht aller Chats
