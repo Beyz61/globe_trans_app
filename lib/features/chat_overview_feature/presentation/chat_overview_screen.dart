@@ -134,6 +134,7 @@ class _ChatViewState extends State<ChatView> {
                                             secondaryAnimation) =>
                                         ChatScreen(
                                       contactName: contactName,
+                                      contactPhone: contact.phoneNumber,
                                     ),
                                     transitionsBuilder: (context, animation,
                                         secondaryAnimation, child) {
