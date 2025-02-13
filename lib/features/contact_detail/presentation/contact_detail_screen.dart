@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:globe_trans_app/features/adcontact_feature/presentation/class.contact.dart';
 import 'package:globe_trans_app/features/adcontact_feature/widgets/input_email_field.dart';
 import 'package:globe_trans_app/features/adcontact_feature/widgets/language_dropdown.dart';
@@ -81,6 +82,9 @@ class ContactDetailScreenState extends State<ContactDetailScreen> {
     if (!_validateForm()) return;
 
     try {
+      context
+          .read<DatabaseRepository>()
+          .createChat("$selectedCountryCode ${_phoneNumberController.text}");
       await context.read<DatabaseRepository>().addContact(
           _firstNameController.text,
           _lastNameController.text,
@@ -151,6 +155,7 @@ class ContactDetailScreenState extends State<ContactDetailScreen> {
       MaterialPageRoute(
         builder: (context) => ChatScreen(
           contactName: "${widget.contact.firstName} ${widget.contact.lastName}",
+          contactPhone: widget.contact.phoneNumber,
         ),
       ),
     );
@@ -315,6 +320,10 @@ class ContactDetailScreenState extends State<ContactDetailScreen> {
                               child: TextFormField(
                                 keyboardType: TextInputType.phone,
                                 controller: _phoneNumberController,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(RegExp(
+                                      r'[0-9\s]')), // Allow numbers and spaces
+                                ],
                                 decoration: const InputDecoration(
                                   hintText: "Telefonnummer",
                                   hintStyle: TextStyle(
@@ -325,6 +334,14 @@ class ContactDetailScreenState extends State<ContactDetailScreen> {
                                     color: Colors.grey,
                                   ),
                                   border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                      vertical: 10), // Add padding
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: "SFProDisplay",
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black87,
                                 ),
                               ),
                             ),
