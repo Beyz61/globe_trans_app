@@ -9,52 +9,66 @@ import 'package:globe_trans_app/features/shared/models/message.dart';
 
 class FirebaseDatabaseRepository implements DatabaseRepository {
   @override
-  FirebaseFirestore get database => FirebaseFirestore.instance;
-  @override
   Future<List<Message>> getMessagesForContact(String contactPhoneNumber) async {
     final firestore = FirebaseFirestore.instance;
-    // String userId = await getUserId();
-    String userPhonenember = await getUserPhoneNumber();
+    String userPhoneNumber = await getUserPhoneNumber();
 
-    final chatQuery = await firestore
+    final chatQuery =
+        await _getChatByTwoNumbers(userPhoneNumber, contactPhoneNumber);
+    // Nimm das erste gefundene Chat-Dokument
+    String chatId = chatQuery.id;
+
+    // Greife auf die Unterkollektion 'messages' zu
+    final messagesSnapshot = await firestore
         .collection("chats")
-        .where("participants", arrayContains: userPhonenember)
-        .where("participants",
-            arrayContains:
-                contactPhoneNumber) // Falls du nur Chats zwischen diesen beiden willst
+        .doc(chatId)
+        .collection("messages")
+        .orderBy("timestamp")
         .get();
 
-    if (chatQuery.docs.isNotEmpty) {
-      // Nimm das erste gefundene Chat-Dokument
-      String chatId = chatQuery.docs.first.id;
-
-      // Greife auf die Unterkollektion 'messages' zu
-      final messagesSnapshot = await firestore
-          .collection("chats")
-          .doc(chatId)
-          .collection("messages")
-          .get();
-      print("Nachrichten gefunden: ${messagesSnapshot.docs.length}");
-
-      return messagesSnapshot.docs.map((doc) {
-        return Message(
-          doc["text"],
-          doc["isSent"],
-          DateTime.parse(doc["timestamp"]),
-          senderId: doc["senderId"],
-          contactName: doc["contactName"],
-          isRead: doc["isRead"],
-        );
-      }).toList();
-    } else {
-      print("Kein Chat gefunden.");
-      return [];
-    }
+    return messagesSnapshot.docs.map((doc) {
+      return Message(
+        doc["text"],
+        doc["isSent"],
+        DateTime.parse(doc["timestamp"]),
+        senderId: doc["sender"],
+        isRead: doc["isRead"],
+        contactName: "",
+      );
+    }).toList();
   }
 
   @override
   void notifyListeners() {
     // noch nicht implementiert
+  }
+
+  Future<dynamic> _getChatByTwoNumbers(
+      String userPhoneNumber, String contactPhoneNumber) async {
+    final firestore = FirebaseFirestore.instance;
+    print([userPhoneNumber, contactPhoneNumber]);
+    final yourchatQuery = await firestore
+        .collection("chats")
+        .where("participants", arrayContains: userPhoneNumber)
+        .get();
+
+    final filteredChats = yourchatQuery.docs.where((doc) {
+      final data = doc.data(); // Cast zu Map
+      final List<dynamic> participants =
+          data["participants"]; // Teilnehmer als Liste holen
+
+      return participants.contains(contactPhoneNumber) &&
+          participants.length == 2;
+    }).toList();
+
+// Falls genau ein Chat existiert, den Pfad ausgeben
+    if (filteredChats.isNotEmpty) {
+      print("Gefundener Chat-Pfad: ${filteredChats.first.reference.path}");
+      return filteredChats.first;
+    } else {
+      print("Kein Chat gefunden.");
+      return "Error";
+    }
   }
 
   @override
@@ -118,7 +132,7 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
 
   // Chat-Funktionen
   @override
-  Future<void> createChat(Message message, String receiverPhoneNumber) async {
+  Future<void> createChat(String receiverPhoneNumber) async {
     final firestore = FirebaseFirestore.instance;
     String userId = await getUserId();
     String userPhoneNumber =
@@ -130,13 +144,13 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
       "created_at": DateTime.now().toIso8601String(),
     });
 
-    await chatRef.collection("messages").add({
-      "text": message.text,
-      "isSent": message.isSent,
-      "timestamp": message.timestamp.toIso8601String(),
-      "isRead": message.isRead,
-      "sender": userId,
-    });
+    // await chatRef.collection("messages").add({
+    //   "text": message.text,
+    //   "isSent": message.isSent,
+    //   "timestamp": message.timestamp.toIso8601String(),
+    //   "isRead": message.isRead,
+    //   "sender": userId,
+    // });
   }
 
   @override
@@ -256,14 +270,34 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
   final List<Message> _messages = [];
 
   @override
-  Future<void> sendMessage(Message message, String chatId) async {
+  Future<void> sendMessage(Message message, String contactPhoneNumber) async {
     final firestore = FirebaseFirestore.instance;
     String userId = await getUserId();
-    final chatRef = firestore
-        .collection("chats")
-        .doc(chatId); // Use the correct chat reference
+    String userPhoneNumber = await getUserPhoneNumber();
 
-    await chatRef.collection("messages").add({
+    print([userPhoneNumber, contactPhoneNumber]);
+
+    final chatQuery =
+        await _getChatByTwoNumbers(userPhoneNumber, contactPhoneNumber);
+
+    String chatId;
+    if (chatQuery != "Error") {
+      // Nimm das erste gefundene Chat-Dokument
+      chatId = chatQuery.id;
+    } else {
+      // Erstelle einen neuen Chat, falls keiner existiert
+      final newChatRef = await firestore.collection("chats").add({
+        "participants": [userPhoneNumber, contactPhoneNumber],
+        "createdAt": DateTime.now().toIso8601String(),
+      });
+      chatId = newChatRef.id;
+    }
+
+    // Greife auf die Unterkollektion 'messages' zu
+    final messagesRef =
+        firestore.collection("chats").doc(chatId).collection("messages");
+
+    await messagesRef.add({
       "text": message.text,
       "isSent": message.isSent,
       "timestamp": message.timestamp.toIso8601String(),
@@ -436,13 +470,7 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
 
   @override
   Future<void> saveMessage(Message message) async {
-    final firestore = FirebaseFirestore.instance;
-    String userId = await getUserId();
-    await firestore.collection("users").doc(userId).collection("messages").add({
-      "text": message.text,
-      "isSent": message.isSent,
-      "timestamp": message.timestamp.toIso8601String(),
-      "isRead": message.isRead,
-    });
+    // Muss noch implementiert werden
+    return;
   }
 }
