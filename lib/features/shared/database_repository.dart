@@ -45,7 +45,7 @@ abstract class DatabaseRepository {
   Future<void> newGroupChat(List<shared.Message> messages);
 
   // Neue chat erstellen
-  Future<void> createChat(shared.Message message, String receiver);
+  Future<void> createChat(String receiver);
 
   // Übersicht aller chats
   Future<List<chat.Chat>> getAllChats();
