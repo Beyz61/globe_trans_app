@@ -14,10 +14,12 @@ class Chat {
 
 class ChatScreen extends StatefulWidget {
   final String contactName;
+  final String contactPhone;
 
   const ChatScreen({
     super.key,
     required this.contactName,
+    required this.contactPhone,
   });
 
   @override
@@ -38,7 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _loadMessages() async {
     final loadedMessages =
         await Provider.of<DatabaseRepository>(context, listen: false)
-            .getMessagesForContact(widget.contactName);
+            .getMessagesForContact(widget.contactPhone);
     setState(() {
       messages.clear();
       messages.addAll(loadedMessages);
@@ -234,7 +236,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   _controller.clear();
                   await context
                       .read<DatabaseRepository>()
-                      .sendMessage(newMessage, widget.contactName);
+                      .sendMessage(newMessage, widget.contactPhone);
+
                   // No need to call _loadMessages here
                 }
               }),
