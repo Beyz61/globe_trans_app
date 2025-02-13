@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:globe_trans_app/config/colors.dart';
+import 'package:globe_trans_app/features/shared/database_repository.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateProfileScreen extends StatefulWidget {
@@ -41,6 +43,8 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         emailController.text; // zum Speichern der E-Mail vom Textfeld
     final String phone =
         phoneController.text; // zum Speichern der Telefonnummer vom Textfeld
+
+    await context.read<DatabaseRepository>().saveUserPhoneNumber(phone);
 
     // Speichern der Daten in SharedPreferences
     final SharedPreferences prefs = await SharedPreferences.getInstance();
