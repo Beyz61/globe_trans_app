@@ -473,4 +473,29 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
     // Muss noch implementiert werden
     return;
   }
+
+  Future<void> saveUserProfile(
+      String name, String email, String phoneNumber) async {
+    try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      User? user = auth.currentUser;
+      if (user != null) {
+        final firestore = FirebaseFirestore.instance;
+        await firestore.collection("users").doc(user.uid).set(
+          {
+            "name": name,
+            "email": email,
+            "phoneNumber": phoneNumber,
+          },
+          SetOptions(
+              merge: true), // Verhindert das Überschreiben anderer Felder
+        );
+        print("Profil erfolgreich gespeichert.");
+      } else {
+        print("Kein authentifizierter Benutzer gefunden.");
+      }
+    } catch (e) {
+      print("Fehler beim Speichern des Profils: $e");
+    }
+  }
 }

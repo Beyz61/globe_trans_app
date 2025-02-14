@@ -87,4 +87,8 @@ abstract class DatabaseRepository {
           contactName: contactName, senderId: 'sender2'),
     ];
   }
+
+  Future<void> saveUserProfile(String name, String email, String phone) async {
+    // Implement the method to save user profile
+  }
 }

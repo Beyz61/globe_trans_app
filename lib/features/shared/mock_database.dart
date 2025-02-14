@@ -5,6 +5,11 @@ import 'package:globe_trans_app/features/shared/models/message.dart'; // Update 
 
 class MockDatabase implements DatabaseRepository {
   @override
+  Future<void> saveUserProfile(
+      String firstName, String lastName, String phoneNumber) async {
+    // Implement your logic here
+  }
+  @override
   Future<void> saveMessage(Message message) async {
     await Future.delayed(const Duration(seconds: 1));
     _messages.add(message);
