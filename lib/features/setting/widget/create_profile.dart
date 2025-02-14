@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:globe_trans_app/config/colors.dart';
 import 'package:globe_trans_app/features/shared/database_repository.dart';
@@ -19,38 +21,48 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   final TextEditingController phoneController = TextEditingController();
 
   @override
-  // mit initState() wird die Methode _loadProfile() aufgerufen, um die Daten aus den SharedPreferences zu laden
   void initState() {
     super.initState();
     _loadProfile();
   }
 
-// _loadProfile() lädt die Daten aus den SharedPreferences und zeigt sie in den Textfeldern an
   Future<void> _loadProfile() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      nameController.text = prefs.getString("name") ?? '';
-      emailController.text = prefs.getString("email") ?? '';
-      phoneController.text = prefs.getString("phone") ?? '';
-    });
+    try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      User? user = auth.currentUser;
+      if (user != null) {
+        final firestore = FirebaseFirestore.instance;
+        DocumentSnapshot userDoc =
+            await firestore.collection("users").doc(user.uid).get();
+        if (userDoc.exists) {
+          setState(() {
+            nameController.text = userDoc["name"] ?? '';
+            emailController.text = userDoc["email"] ?? '';
+            phoneController.text = userDoc["phoneNumber"] ?? '';
+          });
+        }
+      } else {
+        print("Kein authentifizierter Benutzer gefunden.");
+      }
+    } catch (e) {
+      print("Fehler beim Laden des Profils: $e");
+    }
   }
 
-// saveProfile() speichert die Daten in den SharedPreferences
   Future<void> saveProfile() async {
-    final String name =
-        nameController.text; // zum Speichern des Namens vom Textfeld
-    final String email =
-        emailController.text; // zum Speichern der E-Mail vom Textfeld
-    final String phone =
-        phoneController.text; // zum Speichern der Telefonnummer vom Textfeld
+    final String name = nameController.text;
+    final String email = emailController.text;
+    final String phone = phoneController.text;
 
-    await context.read<DatabaseRepository>().saveUserPhoneNumber(phone);
+    await context
+        .read<DatabaseRepository>()
+        .saveUserProfile(name, email, phone);
 
     // Speichern der Daten in SharedPreferences
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("name", name); // Speichern des Namens
-    await prefs.setString("email", email); // Speichern der E-Mail
-    await prefs.setString("phone", phone); // Speichern der Telefonnummer
+    await prefs.setString("name", name);
+    await prefs.setString("email", email);
+    await prefs.setString("phone", phone);
 
     // Zeigen Sie eine Snackbar an, um den Benutzer zu informieren, dass das Profil gespeichert wurde
     ScaffoldMessenger.of(context).showSnackBar(
