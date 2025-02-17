@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:globe_trans_app/features/shared/database_repository.dart';
@@ -122,10 +123,12 @@ class _ChatScreenState extends State<ChatScreen> {
                         );
                       }
                       final message = messages[index - 1];
+                      final isSender = message.senderId ==
+                          (FirebaseAuth.instance.currentUser?.uid ?? "");
                       return Align(
-                        alignment: message.isSent
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
+                        alignment: isSender
+                            ? Alignment.centerLeft
+                            : Alignment.centerRight,
                         child: IntrinsicWidth(
                           child: Container(
                             constraints: BoxConstraints(
@@ -136,9 +139,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 vertical: 5, horizontal: 10),
                             padding: const EdgeInsets.all(15),
                             decoration: BoxDecoration(
-                              color: message.isSent
-                                  ? Colors.green
-                                  : Colors.grey[300],
+                              color: isSender ? Colors.grey[300] : Colors.green,
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(20),
                                 topRight: const Radius.circular(20),
