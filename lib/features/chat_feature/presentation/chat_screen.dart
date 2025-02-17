@@ -123,8 +123,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         );
                       }
                       final message = messages[index - 1];
-                      final isSender = message.senderId ==
+                      final isSender = message.senderId !=
                           (FirebaseAuth.instance.currentUser?.uid ?? "");
+
                       return Align(
                         alignment: isSender
                             ? Alignment.centerLeft
@@ -225,12 +226,14 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: const Icon(Icons.send, color: Colors.green),
               onPressed: () async {
+                print(FirebaseAuth.instance.currentUser?.uid ?? "");
+
                 if (_controller.text.isNotEmpty) {
                   final newMessage = Message(
                       _controller.text, true, DateTime.now(),
                       isRead: true,
                       contactName: widget.contactName,
-                      senderId: '');
+                      senderId: FirebaseAuth.instance.currentUser?.uid ?? "");
                   setState(() {
                     messages.add(newMessage); // Add message to local list
                   });
