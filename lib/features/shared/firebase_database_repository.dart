@@ -474,6 +474,7 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
     return;
   }
 
+  @override
   Future<void> saveUserProfile(
       String name, String email, String phoneNumber) async {
     try {
