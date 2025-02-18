@@ -139,24 +139,25 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: Container(
                             constraints: BoxConstraints(
                               maxWidth: MediaQuery.of(context).size.width *
-                                  0.6, // Adjusted width
+                                  0.7, // Breiter machen
                             ),
                             margin: const EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 10),
-                            padding: const EdgeInsets.all(15),
+                                vertical: 5, horizontal: 15),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 16), // Mehr Padding
                             decoration: BoxDecoration(
                               color: isSender
                                   ? const Color.fromARGB(87, 34, 36, 36)
                                   : Colors.green,
                               borderRadius: BorderRadius.only(
-                                topLeft: const Radius.circular(20),
-                                topRight: const Radius.circular(20),
+                                topLeft: const Radius.circular(18),
+                                topRight: const Radius.circular(18),
                                 bottomLeft: message.isSent
-                                    ? const Radius.circular(20)
+                                    ? const Radius.circular(18)
                                     : Radius.zero,
                                 bottomRight: message.isSent
                                     ? Radius.zero
-                                    : const Radius.circular(20),
+                                    : const Radius.circular(18),
                               ),
                             ),
                             child: Column(
@@ -168,7 +169,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                     color: message.isSent
                                         ? Colors.white
                                         : Colors.black,
-                                    fontSize: 16,
+                                    fontSize:
+                                        18, // Größerer Text für bessere Lesbarkeit
                                   ),
                                 ),
                                 const SizedBox(height: 5),

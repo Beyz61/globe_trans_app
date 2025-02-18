@@ -23,7 +23,7 @@ class MessageBubble extends StatelessWidget {
           type: isSent ? BubbleType.sendBubble : BubbleType.receiverBubble,
         ),
         alignment: isSent ? Alignment.topRight : Alignment.topLeft,
-        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
         backGroundColor:
             isSent ? const Color.fromARGB(255, 22, 174, 27) : Colors.white,
         child: Column(
