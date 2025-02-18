@@ -1,0 +1,2 @@
+/Users/serveronline73/Code/GLOBETRANSMESSAGE/globe_trans_app/android/app/.cxx/Debug/1c695l2j/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/serveronline73/Code/GLOBETRANSMESSAGE/globe_trans_app/android/app/.cxx/Debug/1c695l2j/arm64-v8a/CMakeFiles/rebuild_cache.dir
