@@ -39,13 +39,18 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _loadMessages() async {
-    final loadedMessages =
-        await Provider.of<DatabaseRepository>(context, listen: false)
-            .getMessagesForContact(widget.contactPhone);
-    setState(() {
-      messages.clear();
-      messages.addAll(loadedMessages);
-    });
+    await Provider.of<DatabaseRepository>(context, listen: false)
+        .getMessagesForContact(widget.contactPhone)
+        .then(
+      (value) {
+        value.listen((event) {
+          setState(() {
+            messages.clear();
+            messages.addAll(event);
+          });
+        });
+      },
+    );
   }
 
   @override
@@ -141,7 +146,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             padding: const EdgeInsets.all(15),
                             decoration: BoxDecoration(
                               color: isSender
-                                  ? Colors.blueGrey[300]
+                                  ? const Color.fromARGB(87, 34, 36, 36)
                                   : Colors.green,
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(20),
@@ -208,7 +213,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildMessageInput() {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(40.0),
       child: Row(
         children: [
           Expanded(
@@ -217,7 +222,7 @@ class _ChatScreenState extends State<ChatScreen> {
               decoration: InputDecoration(
                 hintText: "Nachricht senden...",
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: Colors.green),
                 ),
                 filled: true,
@@ -237,14 +242,12 @@ class _ChatScreenState extends State<ChatScreen> {
                       contactName: widget.contactName,
                       senderId: FirebaseAuth.instance.currentUser?.uid ?? "");
                   setState(() {
-                    messages.add(newMessage); // Add message to local list
+                    messages.add(newMessage);
                   });
                   _controller.clear();
                   await context
                       .read<DatabaseRepository>()
                       .sendMessage(newMessage, widget.contactPhone);
-
-                  // No need to call _loadMessages here
                 }
               }),
         ],

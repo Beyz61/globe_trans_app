@@ -1,41 +1,59 @@
 // ignore_for_file: avoid_print
 
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:globe_trans_app/features/adcontact_feature/presentation/class.contact.dart';
 import 'package:globe_trans_app/features/chat_feature/presentation/chat_screen.dart';
 import 'package:globe_trans_app/features/shared/database_repository.dart';
+import 'package:globe_trans_app/features/shared/models/message.dart' as shared;
 import 'package:globe_trans_app/features/shared/models/message.dart';
 
 class FirebaseDatabaseRepository implements DatabaseRepository {
   @override
-  Future<List<Message>> getMessagesForContact(String contactPhoneNumber) async {
+  Future<Stream<List<shared.Message>>> getMessagesForContact(
+      String contactPhoneNumber) async {
+    StreamSubscription? listener;
+
     final firestore = FirebaseFirestore.instance;
     String userPhoneNumber = await getUserPhoneNumber();
-
     final chatQuery =
         await _getChatByTwoNumbers(userPhoneNumber, contactPhoneNumber);
     // Nimm das erste gefundene Chat-Dokument
     String chatId = chatQuery.id;
 
-    // Greife auf die Unterkollektion 'messages' zu
-    final messagesSnapshot = await firestore
+    Stream<QuerySnapshot> messagesStream = firestore
         .collection("chats")
         .doc(chatId)
         .collection("messages")
         .orderBy("timestamp")
-        .get();
+        .snapshots();
 
-    return messagesSnapshot.docs.map((doc) {
-      return Message(
-        doc["text"],
-        doc["isSent"],
-        DateTime.parse(doc["timestamp"]),
-        senderId: doc["sender"],
-        isRead: doc["isRead"],
-        contactName: "",
-      );
-    }).toList();
+    StreamController<List<shared.Message>> controller =
+        StreamController<List<shared.Message>>(
+      onCancel: () {
+        if (listener != null) {
+          listener.cancel();
+        }
+      },
+    );
+
+    listener = messagesStream.listen((event) {
+      List<shared.Message> messages = event.docs.map((doc) {
+        return shared.Message(
+          doc["text"],
+          doc["isSent"],
+          DateTime.parse(doc["timestamp"]),
+          senderId: doc["sender"],
+          isRead: doc["isRead"],
+          contactName: "",
+        );
+      }).toList();
+      controller.add(messages);
+    });
+
+    return controller.stream;
   }
 
   @override
@@ -344,7 +362,7 @@ class FirebaseDatabaseRepository implements DatabaseRepository {
 
   @override
   Future<List<Message>> getAllMessages() async {
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 1));
     final firestore = FirebaseFirestore.instance;
     String userId = await getUserId();
     final snapshot = await firestore

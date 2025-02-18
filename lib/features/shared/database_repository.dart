@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:globe_trans_app/features/adcontact_feature/presentation/class.contact.dart';
 import 'package:globe_trans_app/features/chat_feature/presentation/chat_screen.dart'
     as chat;
@@ -77,16 +79,17 @@ abstract class DatabaseRepository {
 
   Future<void> getContact(Contact contact);
 
-  Future<List<shared.Message>> getMessagesForContact(String contactName) async {
-    return [
-      shared.Message("Hello, how are you?", false,
-          DateTime.now().subtract(const Duration(minutes: 5)),
-          contactName: contactName, senderId: 'sender1'),
-      shared.Message("I'm good, thanks!", true,
-          DateTime.now().subtract(const Duration(minutes: 4)),
-          contactName: contactName, senderId: 'sender2'),
-    ];
-  }
+  Future<Stream<List<shared.Message>>> getMessagesForContact(
+      String contactName);
+  //   return [
+  //     shared.Message("Hello, how are you?", false,
+  //         DateTime.now().subtract(const Duration(minutes: 5)),
+  //         contactName: contactName, senderId: 'sender1'),
+  //     shared.Message("I'm good, thanks!", true,
+  //         DateTime.now().subtract(const Duration(minutes: 4)),
+  //         contactName: contactName, senderId: 'sender2'),
+  //   ];
+  // }
 
   Future<void> saveUserProfile(String name, String email, String phone) async {
     // Implement the method to save user profile

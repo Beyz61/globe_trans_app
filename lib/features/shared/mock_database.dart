@@ -1,7 +1,9 @@
 import 'package:globe_trans_app/features/adcontact_feature/presentation/class.contact.dart';
 import 'package:globe_trans_app/features/chat_feature/presentation/chat_screen.dart';
 import 'package:globe_trans_app/features/shared/database_repository.dart';
-import 'package:globe_trans_app/features/shared/models/message.dart'; // Update import
+import 'package:globe_trans_app/features/shared/models/message.dart'
+    as shared; // Update import
+import 'package:globe_trans_app/features/shared/models/message.dart';
 
 class MockDatabase implements DatabaseRepository {
   @override
@@ -16,9 +18,10 @@ class MockDatabase implements DatabaseRepository {
   }
 
   @override
-  Future<List<Message>> getMessagesForContact(String contactId) async {
+  Future<Stream<List<shared.Message>>> getMessagesForContact(
+      String contactId) async {
     await Future.delayed(const Duration(seconds: 1));
-    return _messages.where((message) => message.senderId == contactId).toList();
+    return Stream.value(_messages);
   }
 
   @override
@@ -56,13 +59,6 @@ class MockDatabase implements DatabaseRepository {
           newContent, message.isSent, DateTime.parse(newTimeStamp),
           contactName: '', senderId: '');
     }
-  }
-
-  // Übersicht aller Nachrichten
-  @override
-  Future<List<Message>> getAllMessages() async {
-    await Future.delayed(const Duration(seconds: 1));
-    return List.unmodifiable(_messages);
   }
 
   // Neue Chat Gruppe erstellen
@@ -165,6 +161,12 @@ class MockDatabase implements DatabaseRepository {
 
   @override
   Future<void> saveUserPhoneNumber(String phoneNumber) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<shared.Message>> getAllMessages() {
+    // TODO: implement getAllMessages
     throw UnimplementedError();
   }
 }
